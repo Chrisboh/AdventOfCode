@@ -15,18 +15,20 @@ internal class Program
             for (int jj = 0; jj < monkeys.Count; jj++)
             {
                 //Console.WriteLine($"Monkey {jj}:");
-                foreach (BigInteger item in monkeys[jj].Items)
+                foreach (long item in monkeys[jj].Items)
                 {
                     monkeys[jj].NumberOfItemsInspected++;
-                    BigInteger worryLevel = monkeys[jj].OpType switch
+                    long worryLevel = monkeys[jj].OpType switch
                     {
                         Operations.Add => item + monkeys[jj].OpValue,
                         Operations.Multiply => item * (monkeys[jj].OpValue == 100 ? item : monkeys[jj].OpValue),
                     };
 
+                    var factor = monkeys.Select(m => m.TestValue).Aggregate((a, b) => a * b);
                     //worryLevel /= 3;
+                    worryLevel %= factor;
 
-                    if (worryLevel % (BigInteger)monkeys[jj].TestValue == 0)
+                    if (worryLevel % monkeys[jj].TestValue == 0)
                     {
                         monkeys[monkeys[jj].TestTrueMonkey].Items.Add(worryLevel);
                     }
@@ -38,13 +40,6 @@ internal class Program
 
                 monkeys[jj].Items.Clear();
             }
-
-            //for (int qq = 0; qq < monkeys.Count(); qq++)
-            //{
-            //    Console.Write($"Monkey {qq}: ");
-            //    monkeys[qq].PrintItems();
-            //}
-            //Console.WriteLine();
         }
 
         PrintInspection(monkeys);
@@ -52,10 +47,10 @@ internal class Program
 
     private static void PrintInspection(List<Monkey> monkeys)
     {
-        List<BigInteger> monkeyBusiness = new List<BigInteger>();
+        List<long> monkeyBusiness = new List<long>();
         for (int qq = 0; qq < monkeys.Count; qq++)
         {
-            monkeyBusiness.Add((BigInteger)monkeys[qq].NumberOfItemsInspected);
+            monkeyBusiness.Add((long)monkeys[qq].NumberOfItemsInspected);
             Console.WriteLine($"Monkey {qq} inspected items {monkeys[qq].NumberOfItemsInspected} times ");
         }
 
@@ -65,16 +60,16 @@ internal class Program
 
     public static List<Monkey> ParseData()
     {
-        string[] lines = File.ReadAllLines(@"D:\src\AdventOfCode\AOCDay11\input.txt");
+        string[] lines = File.ReadAllLines(@"C:\src\AOC\AdventOfCode\AOCDay11\input.txt");
         List<Monkey> result = new List<Monkey>();
         for (int ii = 0; ii < lines.Length; ii += 7)
         {
             // Parse items
-            List<BigInteger> items = new List<BigInteger>();
+            List<long> items = new List<long>();
             string[] data = lines[ii + 1].Substring(18).Split(", ");
             foreach (string item in data)
             {
-                items.Add(BigInteger.Parse(item));
+                items.Add(long.Parse(item));
             }
 
             // Parse operation
@@ -105,7 +100,7 @@ internal class Program
 
 public class Monkey
 {
-    public List<BigInteger> Items { get; set; }
+    public List<long> Items { get; set; }
     public Operations OpType { get; set; }
     public int OpValue { get; set; }
     public int TestValue { get; set; }
@@ -113,7 +108,7 @@ public class Monkey
     public int TestFalseMonkey { get; set; }
     public int NumberOfItemsInspected { get; set; } = 0;
 
-    public Monkey(List<BigInteger> items, Operations opType, int opValue, int testValue, int testTrueMonkey, int testFalseMonkey)
+    public Monkey(List<long> items, Operations opType, int opValue, int testValue, int testTrueMonkey, int testFalseMonkey)
     {
         Items = items;
         OpType = opType;
@@ -126,7 +121,7 @@ public class Monkey
     public void PrintItems()
     {
         StringBuilder output = new StringBuilder();
-        foreach (BigInteger item in Items)
+        foreach (long item in Items)
         {
             output.Append($"{item} ");
         }
